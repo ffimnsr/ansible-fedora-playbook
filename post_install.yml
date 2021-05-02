@@ -1,10 +1,17 @@
 ---
 - hosts: 127.0.0.1
   connection: local
+  vars_prompt:
+    - name: "my_username"
+      prompt: "Enter your git name"
+      private: false
+    - name: "my_email"
+      prompt: "Enter your git email"
+      private: false
   tasks:
     - debug:
         var: ansible_facts.env.HOSTNAME
-    - name: Install Development Tools
+    - name: install development tools
       become: yes
       dnf:
         name: 
@@ -21,20 +28,44 @@
           - curl
         state: present
         update_cache: yes
-    - name: Install Rustup
+    - name: install rustup
       shell: curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
       args:
         warn: no
         creates: ~/.rustup/settings.toml
-    - name: Install Rustup Completions
+    - name: install rustup completions
       become: yes
       shell: /home/pastel/.cargo/bin/rustup completions bash > /etc/bash_completion.d/rustup.bash-completion
       args:
         creates: /etc/bash_completion.d/rustup.bash-completion
-    - name: Install Z.sh
+    - name: install z.sh directory traverser
       become: yes
       get_url:
         url: https://raw.githubusercontent.com/rupa/z/master/z.sh
         dest: /usr/local/bin/z.sh
         mode: '0555'
         checksum: sha256:ea8fb754e83fab8cff672ca705e9c0206d2f0e7076ec18da98e7a4a41df32233
+    - name: setup git config global
+      git_config:
+        name: "{{ item.name }}"
+        value: "{{ item.value }}"
+        scope: global
+      with_items:
+        - { name: "user.name", value: "{{ my_username }}" }
+        - { name: "user.email", value: "{{ my_email }}" }
+        - { name: "alias.st", value: "status -sb" }
+        - { name: "alias.ci", value: "commit" }
+        - { name: "alias.co", value: "checkout" }
+        - { name: "alias.br", value: "branch --format='%(HEAD) %(color:yellow)%(refname:short)%(color:reset) - %(contents:subject) %(color:green)(%(committerdate:relative)) [%(authorname)]' --sort=-committerdate" }
+        - { name: "alias.ll", value: "log --graph --pretty=format:'%C(magenta)%h%Creset -%C(red)%d%Creset %s %C(dim green)(%cr) [%an]' --abbrev-commit -20" }
+        - { name: "alias.last", value: "log -1 HEAD --stat" }
+        - { name: "alias.assume", value: "update-index --assume-unchanged" }
+        - { name: "alias.unassume", value: "update-index --no-assume-unchanged" }
+        - { name: "alias.assumed", value: "!git ls-files -v | grep ^h | cut -c 3-" }
+        - { name: "alias.pp", value: "push origin HEAD" }
+        - { name: "alias.rank", value: "shortlog -sn --no-merges" }
+        - { name: "alias.conflicts", value: "diff --name-only --diff-filter=U" }
+        - { name: "alias.history", value: "log --all --decorate --oneline --graph" }
+        - { name: "core.autocrlf", value: "false" }
+        - { name: "core.eol", value: "lf" }
+ 
