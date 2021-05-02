@@ -1,0 +1,33 @@
+---
+- hosts: 127.0.0.1
+  connection: local
+  tasks:
+    - debug:
+        var: ansible_facts.env.HOSTNAME
+    - name: Install Development Tools
+      become: yes
+      dnf:
+        name: 
+          - git
+          - entr
+          - jq
+          - nmap
+          - tmux
+          - make
+          - automake
+          - gcc
+          - gcc-c++
+          - bash-completion
+          - curl
+        state: present
+        update_cache: yes
+    - name: Install Rustup
+      shell: curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+      args:
+        warn: no
+        creates: ~/.rustup/settings.toml
+    - name: Install Rustup Completions
+      become: yes
+      shell: /home/pastel/.cargo/bin/rustup completions bash > /etc/bash_completion.d/rustup.bash-completion
+      args:
+        creates: /etc/bash_completion.d/rustup.bash-completion
