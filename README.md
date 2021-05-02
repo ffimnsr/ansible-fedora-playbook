@@ -2,23 +2,22 @@
 
 This repository contains my custom ansible playbook to bootstrap a fresh fedora installation.
 
-To run:
-
-1. Install `ansible`.
+To use this, first you must install `ansible`.
 
 ```bash
 sudo dnf ansible
 ```
 
-2. Clone this repository.
+Then clone this repository in an workable directory.
 
 ```
 git clone git@github.com:ffimnsr/ansible-fedora-playbook.git
 ```
 
-3. Run this playbook.
+Then run this playbook using the `ansible-playbook` command.
+
 ```bash
 ansible-playbook --ask-become-pass post_install.yml
 ```
 
-4. Verify if changes been made.
+Verify if changes been made on the host machine.
