@@ -66,6 +66,10 @@
         - { name: "alias.rank", value: "shortlog -sn --no-merges" }
         - { name: "alias.conflicts", value: "diff --name-only --diff-filter=U" }
         - { name: "alias.history", value: "log --all --decorate --oneline --graph" }
+        - { name: "alias.search", value: "!git rev-list --all | xargs git grep -F" }
+        - { name: "alias.save", value: "!git add -A && git commit -m 'WIP: checkpoint'" }
+        - { name: "alias.undo", value: "reset --mixed HEAD~1" }
         - { name: "core.autocrlf", value: "false" }
         - { name: "core.eol", value: "lf" }
+        - { name: "help.autocorrect", value: "20" }
  
