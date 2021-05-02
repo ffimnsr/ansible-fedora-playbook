@@ -26,6 +26,7 @@
           - gcc-c++
           - bash-completion
           - curl
+          - the_silver_searcher
         state: present
         update_cache: yes
     - name: install rustup
@@ -69,6 +70,7 @@
         - { name: "alias.search", value: "!git rev-list --all | xargs git grep -F" }
         - { name: "alias.save", value: "!git add -A && git commit -m 'WIP: checkpoint'" }
         - { name: "alias.undo", value: "reset --mixed HEAD~1" }
+        - { name: "alias.sgrep", value: "!find . -type f -print0 | xargs -0 grep -i" }
         - { name: "core.autocrlf", value: "false" }
         - { name: "core.eol", value: "lf" }
         - { name: "help.autocorrect", value: "20" }
