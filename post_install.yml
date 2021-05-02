@@ -31,3 +31,10 @@
       shell: /home/pastel/.cargo/bin/rustup completions bash > /etc/bash_completion.d/rustup.bash-completion
       args:
         creates: /etc/bash_completion.d/rustup.bash-completion
+    - name: Install Z.sh
+      become: yes
+      get_url:
+        url: https://raw.githubusercontent.com/rupa/z/master/z.sh
+        dest: /usr/local/bin/z.sh
+        mode: '0555'
+        checksum: sha256:ea8fb754e83fab8cff672ca705e9c0206d2f0e7076ec18da98e7a4a41df32233
