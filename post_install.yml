@@ -27,6 +27,7 @@
           - bash-completion
           - curl
           - the_silver_searcher
+          - pv
         state: present
         update_cache: yes
     - name: install rustup
