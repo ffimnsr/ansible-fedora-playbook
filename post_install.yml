@@ -3,11 +3,13 @@
   connection: local
   vars_prompt:
     - name: "my_username"
-      prompt: "Enter your git name"
+      prompt: "Enter your associated git name"
       private: false
+      default: "ffimnsr"
     - name: "my_email"
-      prompt: "Enter your git email"
+      prompt: "Enter your associated git email"
       private: false
+      default: "ffimnsr@gmail.com"
   tasks:
     - debug:
         var: ansible_facts.env.HOSTNAME
@@ -28,6 +30,12 @@
           - curl
           - the_silver_searcher
           - pv
+          - pkgconfig
+          - openssl-devel
+          - libzstd-devel
+          - zlib-devel
+          - glibc-devel
+          - cmake
         state: present
         update_cache: yes
     - name: install rustup
@@ -75,4 +83,23 @@
         - { name: "core.autocrlf", value: "false" }
         - { name: "core.eol", value: "lf" }
         - { name: "help.autocorrect", value: "20" }
- 
+    - name: add bash aliases
+      lineinfile:
+        dest: ~/.bash_aliases
+        create: yes
+        mode: 0644
+        line: "alias {{ item.alias }}='{{ item.command }}'"
+        regexp: "^alias {{ item.alias }}="
+      with_items:
+        - { alias: "kubectl", command: "minikube kubectl --" }
+        - { alias: "free", command: "free -mlth" }
+        - { alias: "mkdir", command: "mkdir -pv" }
+        - { alias: "mnt", command: "mount | column -t" }
+        - { alias: "now", command: 'date +"%d-%m-%Y %T"' }
+        - { alias: "ports", command: "ss -tulpn" }
+        - { alias: "df", command: "df -h" }
+        - { alias: "du", command: "du -ch" }
+        - { alias: "wget", command: "wget -c" }
+        - { alias: "ping", command: "ping -c 5" }
+        - { alias: "pss", command: "ps axh --format=user,pid,rss,comm,args --sort=-rss,pid | numfmt --from-unit=1024 --to=iec --field 3 | head -20" }
+        - { alias: "whatprovides", command: "dnf repoquery --whatprovides" }
