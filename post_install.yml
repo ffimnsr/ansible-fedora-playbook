@@ -36,6 +36,9 @@
           - zlib-devel
           - glibc-devel
           - cmake
+          - ripgrep
+          - fd-find
+          - skim
         state: present
         update_cache: yes
     - name: install rustup
