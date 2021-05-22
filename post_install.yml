@@ -16,7 +16,7 @@
     - name: install development tools
       become: yes
       dnf:
-        name: 
+        name:
           - git
           - entr
           - jq
@@ -86,6 +86,19 @@
         - { name: "core.autocrlf", value: "false" }
         - { name: "core.eol", value: "lf" }
         - { name: "help.autocorrect", value: "20" }
+        - { name: "trailer.separators", value: ":#" }
+        - { name: "trailer.sign.key", value: "Signed-off-by: " }
+        - { name: "trailer.sign.ifmissing", value: "add" }
+        - { name: "trailer.sign.ifexists", value: "doNothing" }
+        - { name: "trailer.sign.command", value: "echo \"$(git config user.name) <$(git config user.email)>\"" }
+        - { name: "trailer.see.key", value: "See-also: " }
+        - { name: "trailer.see.ifmissing", value: "doNothing" }
+        - { name: "trailer.see.ifexists", value: "replace" }
+        - { name: "trailer.see.command", value: "git log -1 --oneline --format=\"%h (%s)\" --abbrev-commit --abbrev=14 $ARG" }
+        - { name: "trailer.issue.key", value: "Issue: " }
+        - { name: "trailer.issue.ifmissing", value: "doNothing" }
+        - { name: "trailer.issue.ifexists", value: "replace" }
+        - { name: "trailer.issue.command", value: "echo \"https://github.com/$(git ls-remote --get-url origin | cut -d: -f2 | cut -d. -f1)/issues/$ARG\"" }        
     - name: add bash aliases
       lineinfile:
         dest: ~/.bash_aliases
