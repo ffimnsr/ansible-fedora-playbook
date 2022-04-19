@@ -39,6 +39,8 @@
           - ripgrep
           - fd-find
           - skim
+          - figlet
+          - lolcat
         state: present
         update_cache: yes
     - name: install rustup
@@ -57,7 +59,7 @@
         url: https://raw.githubusercontent.com/rupa/z/master/z.sh
         dest: /usr/local/bin/z.sh
         mode: '0555'
-        checksum: sha256:ea8fb754e83fab8cff672ca705e9c0206d2f0e7076ec18da98e7a4a41df32233
+        checksum: sha256:98e4438cd31afb3ce594130335e7fbd8be5d75d9a53e4f3e084d97e6b8d19b0e
     - name: setup git config global
       git_config:
         name: "{{ item.name }}"
