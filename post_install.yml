@@ -101,7 +101,7 @@
         - { name: "trailer.issue.command", value: "echo \"https://github.com/$(git ls-remote --get-url origin | cut -d: -f2 | cut -d. -f1)/issues/$ARG\"" }        
     - name: add bash aliases
       lineinfile:
-        dest: ~/.bash_aliases
+        dest: ~/.bashrc.d/aliases
         create: yes
         mode: 0644
         line: "alias {{ item.alias }}='{{ item.command }}'"
