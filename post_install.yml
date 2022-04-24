@@ -5,7 +5,7 @@
     - name: "my_username"
       prompt: "Enter your associated git name"
       private: false
-      default: "ffimnsr"
+      default: "pastel"
     - name: "my_email"
       prompt: "Enter your associated git email"
       private: false
@@ -41,6 +41,8 @@
           - skim
           - figlet
           - lolcat
+          - llvm
+          - lld
         state: present
         update_cache: yes
     - name: install rustup
@@ -109,7 +111,6 @@
         line: "alias {{ item.alias }}='{{ item.command }}'"
         regexp: "^alias {{ item.alias }}="
       with_items:
-        - { alias: "kubectl", command: "minikube kubectl --" }
         - { alias: "free", command: "free -mlth" }
         - { alias: "mkdir", command: "mkdir -pv" }
         - { alias: "mnt", command: "mount | column -t" }
@@ -121,3 +122,4 @@
         - { alias: "ping", command: "ping -c 5" }
         - { alias: "pss", command: "ps axh --format=user,pid,rss,comm,args --sort=-rss,pid | numfmt --from-unit=1024 --to=iec --field 3 | head -20" }
         - { alias: "whatprovides", command: "dnf repoquery --whatprovides" }
+
