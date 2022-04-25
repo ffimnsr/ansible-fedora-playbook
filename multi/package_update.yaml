@@ -1,0 +1,32 @@
+---
+- hosts: fedora
+  gather_facts: yes
+  tasks:
+    - debug:
+        msg: "{{ ansible_hostname }}:{{ ansible_default_ipv4.address }}"
+    - name: update all packages
+      become: yes
+      dnf:
+        name: '*'
+        state: latest
+        update_cache: yes
+    - name: check if update needs reboot
+      shell: LAST_KERNEL=$(rpm -q --last kernel-core | awk 'NR==1{sub(/kernel-core-/,""); print $1}'); CURRENT_KERNEL=$(uname -r); if [ $LAST_KERNEL != $CURRENT_KERNEL ]; then echo 'yes'; else echo 'no'; fi
+      changed_when: false
+      register: dnf_reboot_hint_result
+    - name: set fact for reboot to no
+      set_fact:
+        reboot_hint_result: false
+      when: dnf_reboot_hint_result.stdout.find("no") != -1
+    - name: set fact for reboot to yes
+      set_fact:
+        reboot_hint_result: true
+      when: dnf_reboot_hint_result.stdout.find("yes") != -1
+    - name: server update reboot
+      become: yes
+      reboot:
+        pre_reboot_delay: 0
+        post_reboot_delay: 10
+        reboot_timeout: 600
+      when: reboot_hint_result | bool
+
