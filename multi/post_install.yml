@@ -1,0 +1,143 @@
+---
+- hosts: sesame-dc1
+  tasks:
+    - name: install development tools
+      become: yes
+      dnf:
+        name:
+          - git
+          - entr
+          - jq
+          - nmap
+          - tmux
+          - make
+          - automake
+          - gcc
+          - gcc-c++
+          - bash-completion
+          - curl
+          - the_silver_searcher
+          - pv
+          - pkgconfig
+          - openssl-devel
+          - libzstd-devel
+          - zlib-devel
+          - glibc-devel
+          - cmake
+          - ripgrep
+          - fd-find
+          - skim
+          - figlet
+          - lolcat
+          - llvm
+          - lld
+          - fail2ban
+          - firewalld
+          - selinux-policy
+          - rpmconf
+          - symlinks
+          - policycoreutils-python-utils
+          - setroubleshoot-server
+          - setroubleshoot-plugins
+        state: present
+        update_cache: yes
+    - name: install z.sh directory traverser
+      become: yes
+      get_url:
+        url: https://raw.githubusercontent.com/rupa/z/master/z.sh
+        dest: /usr/local/bin/z.sh
+        mode: '0555'
+        checksum: sha256:98e4438cd31afb3ce594130335e7fbd8be5d75d9a53e4f3e084d97e6b8d19b0e
+    - name: install figlet 3d font
+      become: yes
+      get_url:
+        url: https://raw.githubusercontent.com/xero/figlet-fonts/master/3d.flf
+        dest: /usr/share/figlet/3d.flf
+        mode: '0644'
+        checksum: sha256:e784641299186d8484c22e69656cbe31f31192dd0b7ca4b1de3174fdb5a63ab3
+    - name: create motd directory
+      file:
+        path: ~/.motd
+        state: directory
+    - name: install motd hello
+      get_url:
+        url: https://gist.githubusercontent.com/ffimnsr/e38b27e328dad4cf9aaa4a4d869c58d2/raw/ed8c6009ccabe28d1bc8d5cc3d1a03b290187c76/hello.sh
+        dest: ~/.motd/hello.sh
+        mode: '0744'
+    - name: update bash_profile
+      blockinfile:
+        path: ~/.bash_profile
+        block: |
+          if [[ ! $TMUX ]]; then
+                  ./.motd/hello.sh
+          fi
+    - name: add bash aliases
+      lineinfile:
+        dest: ~/.bashrc.d/aliases
+        create: yes
+        mode: 0644
+        line: "alias {{ item.alias }}='{{ item.command }}'"
+        regexp: "^alias {{ item.alias }}="
+      with_items:
+        - { alias: "free", command: "free -mlth" }
+        - { alias: "mkdir", command: "mkdir -pv" }
+        - { alias: "mnt", command: "mount | column -t" }
+        - { alias: "now", command: 'date +"%d-%m-%Y %T"' }
+        - { alias: "ports", command: "ss -tulpn" }
+        - { alias: "df", command: "df -h" }
+        - { alias: "du", command: "du -ch" }
+        - { alias: "wget", command: "wget -c" }
+        - { alias: "ping", command: "ping -c 5" }
+        - { alias: "pss", command: "ps axh --format=user,pid,rss,comm,args --sort=-rss,pid | numfmt --from-unit=1024 --to=iec --field 3 | head -20" }
+        - { alias: "whatprovides", command: "dnf repoquery --whatprovides" }
+    - name: create jail config
+      become: yes
+      copy:
+        dest: /etc/fail2ban/jail.local
+        content: |
+          [DEFAULT]
+          bantime = 1d
+          findtime = 1h
+          maxretry = 5
+    - name: create jail sshd config
+      become: yes
+      copy:
+        dest: /etc/fail2ban/jail.d/sshd.local
+        content: |
+          [sshd]
+          enabled = true
+    - name: enable fail2ban
+      become: yes
+      ansible.builtin.systemd:
+        name: fail2ban
+        state: started
+        enabled: yes
+        masked: no
+    - name: create custom sshd config
+      become: yes
+      copy:
+        dest: /etc/ssh/sshd_config.d/ifn4.local
+        validate: /usr/bin/sshd -T -f %s
+        content: |
+          Port 22
+          ListenAddress 0.0.0.0
+
+          SyslogFacility AUTHPRIV
+          LogLevel INFO
+          LoginGraceTime 120
+          PermitRootLogin no
+          StrictModes yes
+          MaxAuthTries 3
+          MaxSessions 6
+          PubkeyAuthentication yes
+          AuthorizedKeysFile .ssh/authorized_keys
+          PasswordAuthentication no
+          KerberosAuthentication no
+          GSSAPIAuthentication no
+    - name: reload sshd
+      become: yes
+      ansible.builtin.systemd:
+        name: sshd
+        state: reloaded
+        enabled: yes
+
