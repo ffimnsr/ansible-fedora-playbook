@@ -1,5 +1,5 @@
 ---
-- hosts: sesame-dc1
+- hosts: sesame-dc1-tun1
   tasks:
     - name: install development tools
       become: yes
@@ -48,6 +48,12 @@
         dest: /usr/local/bin/z.sh
         mode: '0555'
         checksum: sha256:98e4438cd31afb3ce594130335e7fbd8be5d75d9a53e4f3e084d97e6b8d19b0e
+    - name: add z to bashrc
+      lineinfile:
+        dest: ~/.bashrc.d/z
+        create: yes
+        mode: 0644
+        line: '. /usr/local/bin/z.sh'
     - name: install figlet 3d font
       become: yes
       get_url:
@@ -64,6 +70,16 @@
         url: https://gist.githubusercontent.com/ffimnsr/e38b27e328dad4cf9aaa4a4d869c58d2/raw/ed8c6009ccabe28d1bc8d5cc3d1a03b290187c76/hello.sh
         dest: ~/.motd/hello.sh
         mode: '0744'
+    - name: modify root storage in hello motd
+      lineinfile:
+        path: ~/.motd/hello.sh
+        regexp: '^ROOT='
+        line: "ROOT=`df -Ph | grep md2 | awk '{print $4}' | tr -d '\\n'`"
+    - name: modify node message in hello motd
+      lineinfile:
+        path: ~/.motd/hello.sh
+        regexp: '^MESSAGE='
+        line: "MESSAGE=`figlet -f 3d ss-dc1`"
     - name: update bash_profile
       blockinfile:
         path: ~/.bash_profile
@@ -96,9 +112,9 @@
         dest: /etc/fail2ban/jail.local
         content: |
           [DEFAULT]
-          bantime = 1d
-          findtime = 1h
-          maxretry = 5
+          bantime = 7d
+          findtime = 8h
+          maxretry = 2
     - name: create jail sshd config
       become: yes
       copy:

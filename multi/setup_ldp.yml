@@ -1,0 +1,53 @@
+---
+- hosts: sandbox wordpress
+  tasks:
+    - name: print hostname
+      debug:
+        var: ansible_hostname
+    - name: install syslog-ng and openssl-perl
+      become: yes
+      dnf:
+        name:
+          - syslog-ng
+          - openssl-perl
+        state: present
+        update_cache: yes
+    - name: add syslog-ng ldp.conf
+      become: yes
+      copy:
+        src: ./temp/config/ldp.conf
+        dest: /etc/syslog-ng/conf.d/ldp.conf
+    - name: modify sd-id in ld.conf
+      become: yes
+      replace:
+        path: /etc/syslog-ng/conf.d/ldp.conf
+        regexp: 'originSDID@1234'
+        replace: "{{ inventory_hostname_short }}@{{ ansible_eth0.ipv4.address.split('.')[-1] }}"
+    - name: create syslog-ng certs directory
+      become: yes
+      file:
+        path: /etc/syslog-ng/ssl/certs
+        state: directory
+    - name: add syslog-ng certs
+      become: yes
+      copy:
+        src: "{{ item }}"
+        dest: /etc/syslog-ng/ssl/certs/
+        owner: root
+        group: root
+        mode: 0644
+      with_fileglob:
+        - ./temp/certs/*.pem
+    - name: rehash certs
+      become: yes
+      command: c_rehash .
+      args:
+        chdir: /etc/syslog-ng/ssl/certs/
+    - name: enable syslog-ng
+      become: yes
+      ansible.builtin.systemd:
+        name: syslog-ng
+        state: started
+        enabled: yes
+        masked: no
+

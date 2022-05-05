@@ -1,7 +1,7 @@
 [fedora]
 sandbox
 wordpress
-sesame-dc1
+sesame-dc1-tun1
 
 [fedora:vars]
 ansible_python_interpreter=/usr/bin/python3
