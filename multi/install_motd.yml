@@ -1,0 +1,53 @@
+---
+- hosts: sandbox wordpress
+  tasks:
+    - name: install motd tools
+      become: yes
+      dnf:
+        name:
+          - figlet
+          - lolcat
+        state: present
+        update_cache: yes
+    - name: install z.sh directory traverser
+      become: yes
+      get_url:
+        url: https://raw.githubusercontent.com/rupa/z/master/z.sh
+        dest: /usr/local/bin/z.sh
+        mode: '0555'
+        checksum: sha256:98e4438cd31afb3ce594130335e7fbd8be5d75d9a53e4f3e084d97e6b8d19b0e
+    - name: add z to bashrc
+      lineinfile:
+        dest: ~/.bashrc.d/z
+        create: yes
+        mode: 0644
+        line: '. /usr/local/bin/z.sh'
+    - name: install figlet 3d font
+      become: yes
+      get_url:
+        url: https://raw.githubusercontent.com/xero/figlet-fonts/master/3d.flf
+        dest: /usr/share/figlet/3d.flf
+        mode: '0644'
+        checksum: sha256:e784641299186d8484c22e69656cbe31f31192dd0b7ca4b1de3174fdb5a63ab3
+    - name: create motd directory
+      file:
+        path: ~/.motd
+        state: directory
+    - name: install motd hello
+      get_url:
+        url: https://gist.githubusercontent.com/ffimnsr/e38b27e328dad4cf9aaa4a4d869c58d2/raw/hello.sh
+        dest: ~/.motd/hello.sh
+        mode: '0744'
+    - name: modify node message in hello motd
+      lineinfile:
+        path: ~/.motd/hello.sh
+        regexp: '^MESSAGE='
+        line: "MESSAGE=`figlet -f 3d {{ ansible_hostname }}`"
+    - name: update bash_profile
+      blockinfile:
+        path: ~/.bash_profile
+        block: |
+          if [[ ! $TMUX ]]; then
+                  ./.motd/hello.sh
+          fi
+

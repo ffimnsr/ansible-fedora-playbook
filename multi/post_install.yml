@@ -67,14 +67,9 @@
         state: directory
     - name: install motd hello
       get_url:
-        url: https://gist.githubusercontent.com/ffimnsr/e38b27e328dad4cf9aaa4a4d869c58d2/raw/ed8c6009ccabe28d1bc8d5cc3d1a03b290187c76/hello.sh
+        url: https://gist.githubusercontent.com/ffimnsr/e38b27e328dad4cf9aaa4a4d869c58d2/raw/hello.sh
         dest: ~/.motd/hello.sh
         mode: '0744'
-    - name: modify root storage in hello motd
-      lineinfile:
-        path: ~/.motd/hello.sh
-        regexp: '^ROOT='
-        line: "ROOT=`df -Ph | grep md2 | awk '{print $4}' | tr -d '\\n'`"
     - name: modify node message in hello motd
       lineinfile:
         path: ~/.motd/hello.sh
